@@ -26,20 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
   let timer, time = 0, score = 0;
   let cardsChosen = [], cardsChosenId = [], cardsWon = [];
   let playersData = [];
-  const maxPlayers = 3;
 
   const cardArray = [
-    { name: 'distracted', img: 'https://i.imgur.com/ZVbqP2C.png' },
-    { name: 'drake', img: 'https://i.imgur.com/fXK0Mka.png' },
-    { name: 'fine', img: 'https://i.imgur.com/DPxYhQf.png' },
-    { name: 'rollsafe', img: 'https://i.imgur.com/ieJML6v.png' },
-    { name: 'success', img: 'https://i.imgur.com/2y8A1pq.png' },
+    { name: 'distracted', img: 'https://i.postimg.cc/3rMXdK6P/distracted.png' },
+    { name: 'drake', img: 'https://i.postimg.cc/DyKq7W8p/drake.png' },
+    { name: 'fine', img: 'https://i.postimg.cc/bwJXvR9m/fine.png' },
+    { name: 'rollsafe', img: 'https://i.postimg.cc/W3Q2y59G/rollsafe.png' },
+    { name: 'success', img: 'https://i.postimg.cc/htRznj3Y/success.png' },
   ];
+
   const gameCards = [...cardArray, ...cardArray];
+
+  // Replace local audio with direct links
+  bgMusic.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+  flipSound.src = 'https://www.soundjay.com/button/beep-07.mp3';
+  matchSound.src = 'https://www.soundjay.com/button/button-3.mp3';
+  winSound.src = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3';
 
   startBtn.addEventListener('click', () => {
     playerName = playerNameInput.value.trim();
-    if (!playerName) return alert('Please enter your name!');
+    if (playerName === '') return alert('Please enter your name!');
     intro.classList.add('hidden');
     gameContainer.classList.remove('hidden');
     displayName.textContent = playerName;
@@ -126,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     playersData.push({ name: playerName, score, time });
     modal.classList.remove('hidden');
 
-    if (playersData.length === maxPlayers) {
-      setTimeout(showFinalWinner, 800);
+    if (playersData.length === 3) { // announce winner after 3 players
+      setTimeout(showFinalWinner, 1000);
     }
   }
 
@@ -157,7 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
     playersData = [];
     winnerScreen.classList.add('hidden');
     intro.classList.remove('hidden');
+    playerNameInput.value = '';
   });
 
   startGameBtn.addEventListener('click', startGame);
 });
+
