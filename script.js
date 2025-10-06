@@ -27,21 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let cardsChosen = [], cardsChosenId = [], cardsWon = [];
   let playersData = [];
 
+  // Direct online image links (replace with your own if needed)
   const cardArray = [
-    { name: 'distracted', img: 'https://i.postimg.cc/3rMXdK6P/distracted.png' },
-    { name: 'drake', img: 'https://i.postimg.cc/DyKq7W8p/drake.png' },
-    { name: 'fine', img: 'https://i.postimg.cc/bwJXvR9m/fine.png' },
-    { name: 'rollsafe', img: 'https://i.postimg.cc/W3Q2y59G/rollsafe.png' },
-    { name: 'success', img: 'https://i.postimg.cc/htRznj3Y/success.png' },
+    { name: 'distracted', img: 'https://i.imgur.com/6Xz9oWd.png' },
+    { name: 'drake', img: 'https://i.imgur.com/3V0Oe1m.png' },
+    { name: 'fine', img: 'https://i.imgur.com/v6m8x6R.png' },
+    { name: 'rollsafe', img: 'https://i.imgur.com/W2J2GQw.png' },
+    { name: 'success', img: 'https://i.imgur.com/z3YoqZa.png' },
   ];
-
   const gameCards = [...cardArray, ...cardArray];
-
-  // Replace local audio with direct links
-  bgMusic.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-  flipSound.src = 'https://www.soundjay.com/button/beep-07.mp3';
-  matchSound.src = 'https://www.soundjay.com/button/button-3.mp3';
-  winSound.src = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3';
 
   startBtn.addEventListener('click', () => {
     playerName = playerNameInput.value.trim();
@@ -132,8 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
     playersData.push({ name: playerName, score, time });
     modal.classList.remove('hidden');
 
-    if (playersData.length === 3) { // announce winner after 3 players
-      setTimeout(showFinalWinner, 1000);
+    if (playersData.length === 5) {
+      showFinalWinner();
     }
   }
 
@@ -163,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
     playersData = [];
     winnerScreen.classList.add('hidden');
     intro.classList.remove('hidden');
-    playerNameInput.value = '';
   });
 
   startGameBtn.addEventListener('click', startGame);
