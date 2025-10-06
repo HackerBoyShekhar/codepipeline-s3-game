@@ -26,19 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let timer, time = 0, score = 0;
   let cardsChosen = [], cardsChosenId = [], cardsWon = [];
   let playersData = [];
+  const maxPlayers = 3;
 
   const cardArray = [
-    { name: 'distracted', img: 'images/distracted.png' },
-    { name: 'drake', img: 'images/drake.png' },
-    { name: 'fine', img: 'images/fine.png' },
-    { name: 'rollsafe', img: 'images/rollsafe.png' },
-    { name: 'success', img: 'images/success.png' },
+    { name: 'distracted', img: 'https://i.imgur.com/ZVbqP2C.png' },
+    { name: 'drake', img: 'https://i.imgur.com/fXK0Mka.png' },
+    { name: 'fine', img: 'https://i.imgur.com/DPxYhQf.png' },
+    { name: 'rollsafe', img: 'https://i.imgur.com/ieJML6v.png' },
+    { name: 'success', img: 'https://i.imgur.com/2y8A1pq.png' },
   ];
   const gameCards = [...cardArray, ...cardArray];
 
   startBtn.addEventListener('click', () => {
     playerName = playerNameInput.value.trim();
-    if (playerName === '') return alert('Please enter your name!');
+    if (!playerName) return alert('Please enter your name!');
     intro.classList.add('hidden');
     gameContainer.classList.remove('hidden');
     displayName.textContent = playerName;
@@ -125,8 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
     playersData.push({ name: playerName, score, time });
     modal.classList.remove('hidden');
 
-    if (playersData.length === 5) {
-      showFinalWinner();
+    if (playersData.length === maxPlayers) {
+      setTimeout(showFinalWinner, 800);
     }
   }
 
@@ -160,4 +161,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
   startGameBtn.addEventListener('click', startGame);
 });
-
