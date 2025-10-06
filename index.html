@@ -1,23 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meme Matching Game</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meme Matching Game</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>MEME MATCHING GAME</h1>
-        <p class="instructions">
-            Welcome to the Meme Matching sex!  Flip over two cards at a time and try to find all the matching pairs. Be quick and remember where you saw the cards!
-        </p>
-        <button id="start-game">Start Game</button>
-        <div id="game-board" class="game-board">
-            <!-- Cards will be generated here -->
-        </div>
+  <div class="game-container">
+    <h1>🔥 Meme Matching Challenge 🔥</h1>
+    <p class="instructions">
+      Flip the cards and match the memes! Test your memory, speed, and meme sense 😎
+    </p>
+
+    <div class="controls">
+      <button id="start-game" class="btn">Start Game</button>
+      <div class="stats">
+        <span>⏱ Time: <span id="timer">0</span>s</span>
+        <span>🏆 Score: <span id="score">0</span></span>
+      </div>
     </div>
-    <script src="script.js"></script>
+
+    <div id="game-board" class="game-board"></div>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>🎉 Congratulations!</h2>
+        <p>You matched all the memes!</p>
+        <p>Time Taken: <span id="final-time"></span>s</p>
+        <button id="play-again" class="btn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
 
