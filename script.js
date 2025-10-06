@@ -79,5 +79,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.card');
         const [firstId,secondId] = cardsChosenId;
 
-        if(cardsChosen[0]===
+        if(cardsChosen[0]===cardsChosen[1] && firstId!==secondId){
+            matchSound.play();
+            cards[firstId].removeEventListener('click',flipCard);
+            cards[secondId].removeEventListener('click',flipCard);
+            cardsWon.push(firstId,secondId);
+        } else {
+            cards[firstId].classList.remove('flip');
+            cards[secondId].classList.remove('flip');
+        }
+
+        cardsChosen=[]; cardsChosenId=[];
+        score = cardsWon.length/2;
+        scoreEl.textContent=score;
+
+        if(cardsWon.length === cardArray.length){
+            winSound.play();
+            clearInterval(interval);
+            players[players.length-1].score = score;
+            showWinners();
+        }
+    }
+
+    function showWinners(){
+        winnerList.innerHTML='';
+        players.sort((a,b)=>b.score-a.score);
+        players.forEach((p,i)=>{
+            if(i===0) winnerList.innerHTML+=`<p>🏆 ${p.name} - Winner 🥳</p>`;
+            else winnerList.innerHTML+=`<p>💀 ${p.name} - Loser</p>`;
+        });
+        modal.classList.remove('hidden');
+    }
+
+    startBtn.addEventListener('click', startGame);
+    playAgainBtn.addEventListener('click', ()=>{
+        if(players.length >= maxPlayers) {
+            alert('Game over! Maximum players reached. Reload page to play again.');
+            return;
+        }
+        modal.classList.add('hidden');
+        playerForm.classList.remove('hidden');
+        playerInput.value='';
+        gameStats.classList.add('hidden');
+        timer=0; timerEl.textContent=timer;
+    });
+});
 
