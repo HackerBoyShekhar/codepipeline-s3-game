@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const finalTime = document.getElementById('final-time');
   const winnerName = document.getElementById('winner-name');
   const losersList = document.getElementById('losers-list');
-  const confettiContainer = document.getElementById('confetti');
 
   let playerName = '';
   let timer, time = 0, score = 0;
@@ -29,17 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let playersData = [];
 
   const cardArray = [
-    { name: 'distracted', img: 'https://i.imgur.com/6Xz9oWd.png' },
-    { name: 'drake', img: 'https://i.imgur.com/3V0Oe1m.png' },
-    { name: 'fine', img: 'https://i.imgur.com/v6m8x6R.png' },
-    { name: 'rollsafe', img: 'https://i.imgur.com/W2J2GQw.png' },
-    { name: 'success', img: 'https://i.imgur.com/z3YoqZa.png' },
+    { name: 'distracted', img: 'images/distracted.png' },
+    { name: 'drake', img: 'images/drake.png' },
+    { name: 'fine', img: 'images/fine.png' },
+    { name: 'rollsafe', img: 'images/rollsafe.png' },
+    { name: 'success', img: 'images/success.png' },
   ];
   const gameCards = [...cardArray, ...cardArray];
 
   startBtn.addEventListener('click', () => {
     playerName = playerNameInput.value.trim();
-    if (!playerName) return alert('Please enter your name!');
+    if (playerName === '') return alert('Please enter your name!');
     intro.classList.add('hidden');
     gameContainer.classList.remove('hidden');
     displayName.textContent = playerName;
@@ -47,7 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
     startGame();
   });
 
-  function shuffle(array) { array.sort(() => Math.random() - 0.5); }
+  function shuffle(array) {
+    array.sort(() => Math.random() - 0.5);
+  }
 
   function startGame() {
     shuffle(gameCards);
@@ -59,8 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
     time = 0;
     scoreDisplay.textContent = score;
     timerDisplay.textContent = time;
+
     clearInterval(timer);
-    timer = setInterval(() => { time++; timerDisplay.textContent = time; }, 1000);
+    timer = setInterval(() => {
+      time++;
+      timerDisplay.textContent = time;
+    }, 1000);
 
     gameCards.forEach((item, i) => {
       const card = document.createElement('div');
@@ -107,7 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cardsChosen = [];
     cardsChosenId = [];
 
-    if (cardsWon.length === gameCards.length / 2) endGame();
+    if (cardsWon.length === gameCards.length / 2) {
+      endGame();
+    }
   }
 
   function endGame() {
@@ -118,7 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
     playersData.push({ name: playerName, score, time });
     modal.classList.remove('hidden');
 
-    if (playersData.length === 5) showFinalWinner();
+    if (playersData.length === 5) {
+      showFinalWinner();
+    }
   }
 
   playAgainBtn.addEventListener('click', () => {
@@ -141,34 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .join('');
 
     winnerScreen.classList.remove('hidden');
-    runConfetti();
   }
 
   restartAllBtn.addEventListener('click', () => {
     playersData = [];
     winnerScreen.classList.add('hidden');
     intro.classList.remove('hidden');
-    confettiContainer.innerHTML = '';
   });
 
   startGameBtn.addEventListener('click', startGame);
-
-  // Simple confetti effect
-  function runConfetti() {
-    for (let i = 0; i < 100; i++) {
-      const confetti = document.createElement('div');
-      confetti.style.position = 'absolute';
-      confetti.style.width = '10px';
-      confetti.style.height = '10px';
-      confetti.style.background = `hsl(${Math.random()*360},100%,50%)`;
-      confetti.style.top = '-10px';
-      confetti.style.left = `${Math.random()*100}%`;
-      confetti.style.borderRadius = '50%';
-      confetti.style.opacity = Math.random();
-      confetti.style.transform = `rotate(${Math.random()*360}deg)`;
-      confetti.style.animation = `fall ${2+Math.random()*3}s linear forwards`;
-      confettiContainer.appendChild(confetti);
-    }
-  }
 });
-
