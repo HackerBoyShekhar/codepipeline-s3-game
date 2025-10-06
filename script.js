@@ -1,162 +1,83 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const intro = document.getElementById('intro-screen');
-  const gameContainer = document.getElementById('game-container');
-  const gameBoard = document.getElementById('game-board');
-  const startBtn = document.getElementById('start-btn');
-  const startGameBtn = document.getElementById('start-game');
-  const modal = document.getElementById('modal');
-  const playAgainBtn = document.getElementById('play-again');
-  const winnerScreen = document.getElementById('winner-screen');
-  const restartAllBtn = document.getElementById('restart-all');
-  const bgMusic = document.getElementById('bg-music');
-  const flipSound = document.getElementById('flip-sound');
-  const matchSound = document.getElementById('match-sound');
-  const winSound = document.getElementById('win-sound');
+    const grid = document.getElementById('game-board');
+    const startBtn = document.getElementById('start-game');
+    const playerInput = document.getElementById('player-name');
+    const playerForm = document.getElementById('player-form');
+    const gameStats = document.getElementById('game-stats');
+    const timerEl = document.getElementById('timer');
+    const scoreEl = document.getElementById('score');
+    const modal = document.getElementById('modal');
+    const winnerList = document.getElementById('winner-list');
+    const playAgainBtn = document.getElementById('play-again');
 
-  const playerNameInput = document.getElementById('player-name');
-  const displayName = document.getElementById('display-name');
-  const finalPlayer = document.getElementById('final-player');
-  const timerDisplay = document.getElementById('timer');
-  const scoreDisplay = document.getElementById('score');
-  const finalTime = document.getElementById('final-time');
-  const winnerName = document.getElementById('winner-name');
-  const losersList = document.getElementById('losers-list');
+    const flipSound = document.getElementById('flip-sound');
+    const matchSound = document.getElementById('match-sound');
+    const winSound = document.getElementById('win-sound');
 
-  let playerName = '';
-  let timer, time = 0, score = 0;
-  let cardsChosen = [], cardsChosenId = [], cardsWon = [];
-  let playersData = [];
+    let cardsChosen = [], cardsChosenId = [], cardsWon = [], score = 0, timer=0, interval;
+    const maxPlayers = 5;
+    const players = [];
 
-  const cardArray = [
-    { name: 'distracted', img: 'images/distracted.png' },
-    { name: 'drake', img: 'images/drake.png' },
-    { name: 'fine', img: 'images/fine.png' },
-    { name: 'rollsafe', img: 'images/rollsafe.png' },
-    { name: 'success', img: 'images/success.png' },
-  ];
-  const gameCards = [...cardArray, ...cardArray];
+    const cardArray = [
+        {name:'card1',img:'https://i.imgur.com/ZVbqP2C.png'},
+        {name:'card1',img:'https://i.imgur.com/ZVbqP2C.png'},
+        {name:'card2',img:'https://i.imgur.com/fXK0Mka.png'},
+        {name:'card2',img:'https://i.imgur.com/fXK0Mka.png'},
+        {name:'card3',img:'https://i.imgur.com/DPxYhQf.png'},
+        {name:'card3',img:'https://i.imgur.com/DPxYhQf.png'},
+        {name:'card4',img:'https://i.imgur.com/ieJML6v.png'},
+        {name:'card4',img:'https://i.imgur.com/ieJML6v.png'},
+        {name:'card5',img:'https://i.imgur.com/2y8A1pq.png'},
+        {name:'card5',img:'https://i.imgur.com/2y8A1pq.png'},
+    ];
 
-  startBtn.addEventListener('click', () => {
-    playerName = playerNameInput.value.trim();
-    if (playerName === '') return alert('Please enter your name!');
-    intro.classList.add('hidden');
-    gameContainer.classList.remove('hidden');
-    displayName.textContent = playerName;
-    bgMusic.play();
-    startGame();
-  });
+    function shuffle(array){array.sort(()=>0.5 - Math.random());}
 
-  function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-  }
-
-  function startGame() {
-    shuffle(gameCards);
-    gameBoard.innerHTML = '';
-    cardsChosen = [];
-    cardsChosenId = [];
-    cardsWon = [];
-    score = 0;
-    time = 0;
-    scoreDisplay.textContent = score;
-    timerDisplay.textContent = time;
-
-    clearInterval(timer);
-    timer = setInterval(() => {
-      time++;
-      timerDisplay.textContent = time;
-    }, 1000);
-
-    gameCards.forEach((item, i) => {
-      const card = document.createElement('div');
-      card.classList.add('card');
-      card.innerHTML = `
-        <div class="card-inner">
-          <div class="card-front">🎭</div>
-          <div class="card-back" style="background-image: url(${item.img})"></div>
-        </div>`;
-      card.dataset.id = i;
-      card.addEventListener('click', flipCard);
-      gameBoard.appendChild(card);
-    });
-  }
-
-  function flipCard() {
-    const card = this;
-    const id = card.dataset.id;
-    if (cardsChosenId.includes(id) || card.classList.contains('flip')) return;
-    flipSound.play();
-    card.classList.add('flip');
-    cardsChosen.push(gameCards[id].name);
-    cardsChosenId.push(id);
-    if (cardsChosen.length === 2) setTimeout(checkForMatch, 600);
-  }
-
-  function checkForMatch() {
-    const cards = document.querySelectorAll('.card');
-    const [firstId, secondId] = cardsChosenId;
-    const [firstName, secondName] = cardsChosen;
-
-    if (firstName === secondName && firstId !== secondId) {
-      matchSound.play();
-      score += 10;
-      scoreDisplay.textContent = score;
-      cards[firstId].style.visibility = 'hidden';
-      cards[secondId].style.visibility = 'hidden';
-      cardsWon.push(cardsChosen);
-    } else {
-      cards[firstId].classList.remove('flip');
-      cards[secondId].classList.remove('flip');
+    function startGame(){
+        const playerName = playerInput.value.trim();
+        if(!playerName) return alert('Enter your name!');
+        if(players.length >= maxPlayers) return alert('Maximum 5 players reached!');
+        players.push({name:playerName, score:0});
+        playerForm.classList.add('hidden');
+        gameStats.classList.remove('hidden');
+        resetBoard();
+        interval = setInterval(()=>{timer++; timerEl.textContent=timer;},1000);
     }
 
-    cardsChosen = [];
-    cardsChosenId = [];
-
-    if (cardsWon.length === gameCards.length / 2) {
-      endGame();
+    function resetBoard(){
+        shuffle(cardArray);
+        grid.innerHTML='';
+        cardsChosen=[]; cardsChosenId=[]; cardsWon=[];
+        score=0; scoreEl.textContent=score;
+        for(let i=0;i<cardArray.length;i++){
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.setAttribute('data-id',i);
+            card.innerHTML = `<div class="card-inner">
+                <div class="card-front">❓</div>
+                <div class="card-back" style="background-image:url(${cardArray[i].img})"></div>
+            </div>`;
+            card.addEventListener('click', flipCard);
+            grid.appendChild(card);
+        }
     }
-  }
 
-  function endGame() {
-    clearInterval(timer);
-    winSound.play();
-    finalPlayer.textContent = playerName;
-    finalTime.textContent = time;
-    playersData.push({ name: playerName, score, time });
-    modal.classList.remove('hidden');
+    function flipCard(){
+        const cardId = this.getAttribute('data-id');
+        if(cardsChosenId.includes(cardId)) return;
+        flipSound.play();
+        cardsChosen.push(cardArray[cardId].name);
+        cardsChosenId.push(cardId);
+        this.classList.add('flip');
 
-    if (playersData.length === 5) {
-      showFinalWinner();
+        if(cardsChosen.length===2){
+            setTimeout(checkMatch,500);
+        }
     }
-  }
 
-  playAgainBtn.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    startGame();
-  });
+    function checkMatch(){
+        const cards = document.querySelectorAll('.card');
+        const [firstId,secondId] = cardsChosenId;
 
-  function showFinalWinner() {
-    modal.classList.add('hidden');
-    gameContainer.classList.add('hidden');
-    bgMusic.pause();
+        if(cardsChosen[0]===
 
-    playersData.sort((a, b) => b.score - a.score || a.time - b.time);
-    const winner = playersData[0];
-    winnerName.textContent = `🏅 ${winner.name.toUpperCase()} 🏅`;
-
-    losersList.innerHTML = playersData
-      .slice(1)
-      .map(p => `<p>😅 ${p.name} — Loser</p>`)
-      .join('');
-
-    winnerScreen.classList.remove('hidden');
-  }
-
-  restartAllBtn.addEventListener('click', () => {
-    playersData = [];
-    winnerScreen.classList.add('hidden');
-    intro.classList.remove('hidden');
-  });
-
-  startGameBtn.addEventListener('click', startGame);
-});
