@@ -14,30 +14,36 @@ body {
   height: 100vh;
 }
 
-.game-container {
-  text-align: center;
-  width: 90%;
-  max-width: 900px;
+.hidden {
+  display: none !important;
 }
 
-h1 {
+/* Intro Screen */
+.intro-screen {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(255, 123, 0, 0.4);
+}
+
+.intro-screen h1 {
   font-size: 2.5em;
-  background: linear-gradient(90deg, #ff7b00, #ff0077);
+  background: linear-gradient(90deg, #ff0077, #ff7b00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 10px;
-}
-
-.instructions {
-  color: #ddd;
   margin-bottom: 20px;
 }
 
-.controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+#player-name {
+  width: 250px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.1em;
 }
 
 .btn {
@@ -53,7 +59,26 @@ h1 {
 
 .btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(255, 123, 0, 0.5);
+  box-shadow: 0 0 20px rgba(255, 123, 0, 0.6);
+}
+
+/* Game Area */
+.game-container {
+  text-align: center;
+  width: 90%;
+  max-width: 900px;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.8em;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
 .stats span {
@@ -114,7 +139,7 @@ h1 {
   border: 2px solid #ff7b00;
 }
 
-/* Modal */
+/* Modal + Winner */
 .modal {
   position: fixed;
   top: 0;
@@ -125,6 +150,7 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 99;
 }
 
 .modal-content {
@@ -135,7 +161,16 @@ h1 {
   box-shadow: 0 0 25px rgba(255, 123, 0, 0.6);
 }
 
-.hidden {
-  display: none;
+.winner h3 {
+  background: linear-gradient(90deg, #ff0077, #ff7b00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2em;
+  margin: 10px 0;
+}
+
+#losers-list {
+  margin-top: 20px;
+  color: #ccc;
 }
 
