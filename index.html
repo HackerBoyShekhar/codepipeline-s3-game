@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Intro Screen -->
   <div class="intro-screen" id="intro-screen">
     <h1>🎭 Meme Memory Challenge 🎭</h1>
     <p>Enter your name to begin the fun!</p>
@@ -14,6 +15,7 @@
     <button id="start-btn" class="btn">Start Game</button>
   </div>
 
+  <!-- Game Container -->
   <div class="game-container hidden" id="game-container">
     <h2>Welcome, <span id="display-name"></span> 👋</h2>
     <div class="controls">
@@ -26,6 +28,7 @@
     <div id="game-board" class="game-board"></div>
   </div>
 
+  <!-- Modal After Each Game -->
   <div id="modal" class="modal hidden">
     <div class="modal-content" id="modal-content">
       <h2>🎉 Game Complete 🎉</h2>
@@ -35,22 +38,25 @@
     </div>
   </div>
 
+  <!-- Winner Screen -->
   <div id="winner-screen" class="modal hidden">
     <div class="modal-content winner">
       <h2>🏆 Ultimate Winner 🏆</h2>
       <h3 id="winner-name"></h3>
+      <div id="confetti"></div>
       <p>Congratulations! You are the Meme Master!</p>
       <div id="losers-list"></div>
       <button id="restart-all" class="btn">Restart Tournament</button>
     </div>
   </div>
 
-  <!-- Background & sound effects -->
-  <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
-  <audio id="flip-sound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
-  <audio id="match-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-  <audio id="win-sound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+  <!-- Sounds -->
+  <audio id="bg-music" src="sounds/bg-music.mp3" loop></audio>
+  <audio id="flip-sound" src="sounds/flip.mp3"></audio>
+  <audio id="match-sound" src="sounds/match.mp3"></audio>
+  <audio id="win-sound" src="sounds/win.mp3"></audio>
 
   <script src="script.js"></script>
 </body>
 </html>
+
