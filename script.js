@@ -1,264 +1,168 @@
-/* 
-  Behavior:
-  - sessionPlayers (in localStorage) holds the tournament players (max 3)
-  - each finished player enters their best score (higher is better)
-  - after 3 unique players finish => show leaderboard automatically
-  - Play Again clears the session and returns to name input
-*/
-
-const STORAGE_KEY = 'sessionPlayers';       // stores current tournament players (array)
-const MAX_PLAYERS = 3;                      // EXACTLY 3 players per tournament
-
-/* DOM */
-const nameScreen = document.getElementById('name-screen');
-const gameScreen = document.getElementById('game-screen');
-const leaderboardScreen = document.getElementById('leaderboard-screen');
-
-const inputName = document.getElementById('player-name');
-const btnStart = document.getElementById('btn-start');
-const btnRestart = document.getElementById('btn-restart');
-const btnPlayAgain = document.getElementById('btn-playagain');
-
+const startBtn = document.getElementById('start-btn');
+const playerInput = document.getElementById('player-name');
 const playerDisplay = document.getElementById('player-display');
-const timerLabel = document.getElementById('timer');
 const gameBoard = document.getElementById('game-board');
-const leaderList = document.getElementById('leader-list');
+const restartBtn = document.getElementById('restart-btn');
+const leaderboardList = document.getElementById('leaderboard-list');
+const playAgainBtn = document.getElementById('play-again');
+const bgMusic = document.getElementById('bg-music');
+const flipSound = document.getElementById('flip-sound');
+const winSound = document.getElementById('win-sound');
 
-const soundWin = document.getElementById('sound-win');
-const soundLose = document.getElementById('sound-lose');
+let currentPlayer = '';
+let leaderboard = [];
+let cardsChosen = [];
+let cardsChosenId = [];
+let cardsWon = [];
 
-let playerName = '';
-let cards = [];
-let flipped = [];
-let matches = 0;
-let startTime = 0;
-let timerInterval = null;
+const cardArray = [
+  { name: 'card1', img: 'images/distracted.png' },
+  { name: 'card1', img: 'images/distracted.png' },
+  { name: 'card2', img: 'images/drake.png' },
+  { name: 'card2', img: 'images/drake.png' },
+  { name: 'card3', img: 'images/fine.png' },
+  { name: 'card3', img: 'images/fine.png' },
+  { name: 'card4', img: 'images/rollsafe.png' },
+  { name: 'card4', img: 'images/rollsafe.png' },
+  { name: 'card5', img: 'images/success.png' },
+  { name: 'card5', img: 'images/success.png' },
+];
 
-/* emoji set used as cards */
-const MEMES = ['😂','🔥','😎','🥶','💀','💩','😜','🤡'];
-
-/* load session from storage or empty array */
-function loadSession(){
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e){ return []; }
-}
-function saveSession(arr){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-}
-
-/* start tournament flow */
-btnStart.addEventListener('click', () => {
-  const name = inputName.value.trim();
-  if(!name){ alert('Please enter your name'); return; }
-  playerName = name;
-  setupGameForPlayer();
-});
-
-/* restart round button (only restarts current round) */
-btnRestart.addEventListener('click', () => {
-  createBoard();
-});
-
-/* Play Again after leaderboard - resets tournament */
-btnPlayAgain.addEventListener('click', () => {
-  localStorage.removeItem(STORAGE_KEY);
-  // reset UI to name input for new tournament
-  inputName.value = '';
-  leaderboardScreen.classList.add('hidden');
-  nameScreen.classList.remove('hidden');
-});
-
-/* prepare game UI for current player */
-function setupGameForPlayer(){
-  // show game, hide name/leaderboard
-  nameScreen.classList.add('hidden');
-  leaderboardScreen.classList.add('hidden');
-  gameScreen.classList.remove('hidden');
-
-  playerDisplay.textContent = `Player: ${playerName}`;
-  startTimer();
-  createBoard();
+function shuffle(array) {
+  array.sort(() => 0.5 - Math.random());
 }
 
-/* create shuffled board and reset status */
-function createBoard(){
-  stopTimer();
-  timerLabel.textContent = '⏱ 0s';
-  startTime = Date.now();
-  startTimer();
-
-  // prepare shuffled card set
-  const pairSet = MEMES.slice(0, 8); // uses 8 pairs; adjust if needed
-  cards = shuffle([...pairSet, ...pairSet]);
-  matches = 0;
-  flipped = [];
-
-  // render
+function createBoard() {
+  shuffle(cardArray);
   gameBoard.innerHTML = '';
-  cards.forEach((sym, idx) => {
-    const c = document.createElement('div');
-    c.className = 'card';
-    c.dataset.index = idx;
-    c.dataset.sym = sym;
-    c.textContent = '?';
-    c.addEventListener('click', onCardClick);
-    gameBoard.appendChild(c);
-  });
-}
+  for (let i = 0; i < cardArray.length; i++) {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.dataset.id = i;
 
-/* shuffle helper */
-function shuffle(a){ return a.sort(()=> Math.random()-0.5); }
+    const inner = document.createElement('div');
+    inner.classList.add('card-inner');
 
-/* card click handler */
-function onCardClick(e){
-  const el = e.currentTarget;
-  if(el.classList.contains('flipped')) return;
-  if(flipped.length === 2) return;
+    const front = document.createElement('div');
+    front.classList.add('card-front');
+    front.innerHTML = '🃏';
 
-  el.classList.add('flipped');
-  el.textContent = el.dataset.sym;
-  flipped.push(el);
+    const back = document.createElement('div');
+    back.classList.add('card-back');
+    const img = document.createElement('img');
+    img.src = cardArray[i].img;
+    back.appendChild(img);
 
-  if(flipped.length === 2){
-    setTimeout(checkPair, 700);
+    inner.appendChild(front);
+    inner.appendChild(back);
+    card.appendChild(inner);
+
+    card.addEventListener('click', flipCard);
+    gameBoard.appendChild(card);
   }
 }
 
-/* check pair */
-function checkPair(){
-  if(flipped.length < 2) return;
-  const [a,b] = flipped;
-  if(a.dataset.sym === b.dataset.sym && a !== b){
-    a.style.pointerEvents = 'none';
-    b.style.pointerEvents = 'none';
-    matches++;
+function flipCard() {
+  flipSound.play();
+  const cardId = this.dataset.id;
+  const card = this;
+  if (!cardsChosenId.includes(cardId) && cardsChosen.length < 2) {
+    card.classList.add('flipped');
+    cardsChosen.push(cardArray[cardId].name);
+    cardsChosenId.push(cardId);
+  }
+
+  if (cardsChosen.length === 2) {
+    setTimeout(checkForMatch, 700);
+  }
+}
+
+function checkForMatch() {
+  const cards = document.querySelectorAll('.card');
+  const [firstId, secondId] = cardsChosenId;
+
+  if (cardsChosen[0] === cardsChosen[1] && firstId !== secondId) {
+    cards[firstId].style.visibility = 'hidden';
+    cards[secondId].style.visibility = 'hidden';
+    cardsWon.push(cardsChosen);
   } else {
-    a.classList.remove('flipped'); a.textContent = '?';
-    b.classList.remove('flipped'); b.textContent = '?';
+    cards[firstId].classList.remove('flipped');
+    cards[secondId].classList.remove('flipped');
   }
-  flipped = [];
 
-  if(matches === MEMES.length){ roundComplete(); }
-}
+  cardsChosen = [];
+  cardsChosenId = [];
 
-/* timer helpers */
-function startTimer(){
-  stopTimer();
-  startTime = Date.now();
-  timerInterval = setInterval(() => {
-    const sec = Math.floor((Date.now() - startTime)/1000);
-    timerLabel.textContent = `⏱ ${sec}s`;
-  }, 300);
-}
-function stopTimer(){
-  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
-}
-
-/* round complete - compute score and save to session */
-function roundComplete(){
-  stopTimer();
-  const timeSec = Math.floor((Date.now() - startTime)/1000);
-  // score formula: faster => higher. keep floor 10
-  const score = Math.max(100 - timeSec, 10);
-
-  // get existing session
-  const session = loadSession();
-  // check existing player entry -> keep best score
-  const existing = session.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-  if(existing){
-    if(score > existing.score) existing.score = score;
-  } else {
-    if(session.length < MAX_PLAYERS) session.push({ name: playerName, score });
-    else {
-      // if session already has 3 players, replace lowest if this is higher
-      const minIdx = session.reduce((mi, cur, i, arr) => cur.score < arr[mi].score ? i : mi, 0);
-      if(score > session[minIdx].score){
-        session[minIdx] = { name: playerName, score };
-      }
-    }
+  if (cardsWon.length === cardArray.length / 2) {
+    setTimeout(() => {
+      winSound.play();
+      handleWin();
+    }, 800);
   }
-  saveSession(session);
+}
 
-  // if session reached exactly MAX_PLAYERS -> show leaderboard
-  const after = loadSession();
-  if(after.length >= MAX_PLAYERS){
+function handleWin() {
+  leaderboard.push({ name: currentPlayer, score: cardsWon.length });
+  if (leaderboard.length >= 3) {
     showLeaderboard();
   } else {
-    // otherwise prompt next player: return to name screen
-    setTimeout(()=> {
-      alert(`Round finished! ${playerName} scored ${score}. Next player, please enter your name.`);
-      // go to name input for next player
-      inputName.value = '';
-      gameScreen.classList.add('hidden');
-      nameScreen.classList.remove('hidden');
-    }, 300);
+    alert(`Nice job, ${currentPlayer}! Next player's turn.`);
+    showIntro();
   }
 }
 
-/* show the leaderboard built from session (max 3) */
-function showLeaderboard(){
-  gameScreen.classList.add('hidden');
-  leaderboardScreen.classList.remove('hidden');
-
-  const session = loadSession().slice(); // copy
-  // sort desc by score
-  session.sort((a,b)=> b.score - a.score);
-
-  // build UI (exactly up to 3 entries)
-  leaderList.innerHTML = '';
-  session.forEach((p, i) => {
-    const li = document.createElement('li');
-    li.textContent = `${p.name} — Score: ${p.score}`;
-    // style rows similar to sample image: first gold, remaining darker shades
-    if(i===0){
-      li.classList.add('winner');
-      li.innerHTML = `🏆 ${p.name} — WINNER 🎉 (Score: ${p.score})`;
-      // celebratory effects
-      if(soundAvailable(soundWin)) soundWin.play().catch(()=>{});
-      launchConfetti();
-    } else if(i===1){
-      li.classList.add('loser-1');
-      li.innerHTML = `💀 ${p.name} — Loser 😞 (Score: ${p.score})`;
-      if(soundAvailable(soundLose)) soundLose.play().catch(()=>{});
-    } else {
-      li.classList.add('loser-2');
-      li.innerHTML = `💀 ${p.name} — Loser 😞 (Score: ${p.score})`;
-      if(soundAvailable(soundLose)) soundLose.play().catch(()=>{});
-    }
-    leaderList.appendChild(li);
-  });
+function showIntro() {
+  document.getElementById('intro-screen').classList.add('active');
+  document.getElementById('game-screen').classList.add('hidden');
+  playerInput.value = '';
 }
 
-/* simple confetti */
-function launchConfetti(){
-  if(typeof confetti === 'function'){
-    const duration = 2.5 * 1000;
-    const end = Date.now() + duration;
-    (function frame(){
-      confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 } });
-      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 } });
-      if(Date.now() < end) requestAnimationFrame(frame);
-    })();
-  }
+function showGame() {
+  document.getElementById('intro-screen').classList.remove('active');
+  document.getElementById('intro-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  createBoard();
+  playerDisplay.textContent = `👤 Player: ${currentPlayer}`;
 }
 
-/* sound check helper */
-function soundAvailable(el){ return !!(el && el.play); }
+function showLeaderboard() {
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('leaderboard-screen').classList.remove('hidden');
+  leaderboardList.innerHTML = leaderboard
+    .map((p, i) => {
+      const emoji = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
+      return `<div class="leaderboard-item">${emoji} ${p.name} — ${p.score * 10} pts</div>`;
+    })
+    .join('');
+}
 
-/* --- on load, restore session state if any --- */
-(function init(){
-  const session = loadSession();
-  // if session already reached MAX_PLAYERS, show leaderboard directly
-  if(session && session.length >= MAX_PLAYERS){
-    nameScreen.classList.add('hidden');
-    showLeaderboard();
-    return;
+startBtn.addEventListener('click', () => {
+  const name = playerInput.value.trim();
+  if (name) {
+    currentPlayer = name;
+    bgMusic.play();
+    cardsWon = [];
+    cardsChosen = [];
+    cardsChosenId = [];
+    showGame();
+  } else {
+    alert('Please enter your name!');
   }
-  // otherwise show name input
-  nameScreen.classList.remove('hidden');
-  gameScreen.classList.add('hidden');
-  leaderboardScreen.classList.add('hidden');
-})();
+});
+
+restartBtn.addEventListener('click', () => {
+  const confirmRestart = confirm(
+    'Are you sure you want to restart the round? This will clear all leaderboard data.'
+  );
+  if (confirmRestart) {
+    leaderboard = [];
+    cardsWon = [];
+    showIntro();
+  }
+});
+
+playAgainBtn.addEventListener('click', () => {
+  leaderboard = [];
+  showIntro();
+});
 
