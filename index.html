@@ -1,56 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meme Matching Game</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="intro-screen" id="intro-screen">
-    <h1>🎭 Meme Memory Challenge 🎭</h1>
-    <p>Enter your name to begin the fun!</p>
-    <input type="text" id="player-name" placeholder="Your Name" maxlength="15">
-    <button id="start-btn" class="btn">Start Game</button>
-  </div>
+  <div class="container">
+    <h1 class="game-title">🎮 MEME MATCHING GAME 🎮</h1>
 
-  <div class="game-container hidden" id="game-container">
-    <h2>Welcome, <span id="display-name"></span> 👋</h2>
-    <div class="controls">
-      <button id="start-game" class="btn">Restart</button>
-      <div class="stats">
-        <span>⏱ Time: <span id="timer">0</span>s</span>
-        <span>🏆 Score: <span id="score">0</span></span>
+    <!-- Name Input -->
+    <div id="name-screen" class="name-screen fade-in">
+      <p>Enter your name to begin your challenge 👇</p>
+      <input type="text" id="player-name" placeholder="Your Name..." />
+      <button id="start-btn">Start Game</button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game-area" class="hidden fade-in">
+      <div class="game-top">
+        <p id="player-display"></p>
+        <p id="timer">⏱️ Time: 0s</p>
       </div>
+      <div id="game-board" class="game-board"></div>
     </div>
-    <div id="game-board" class="game-board"></div>
-  </div>
 
-  <div id="modal" class="modal hidden">
-    <div class="modal-content" id="modal-content">
-      <h2>🎉 Game Complete 🎉</h2>
-      <p>Nice work <span id="final-player"></span>!</p>
-      <p>Your Time: <span id="final-time"></span>s</p>
-      <button id="play-again" class="btn">Play Again</button>
+    <!-- Leaderboard -->
+    <div id="leaderboard" class="hidden fade-in">
+      <h2>🏆 Final Leaderboard 🏆</h2>
+      <ul id="leader-list"></ul>
+      <button id="play-again">Play Again</button>
     </div>
   </div>
 
-  <div id="winner-screen" class="modal hidden">
-    <div class="modal-content winner">
-      <h2>🏆 Ultimate Winner 🏆</h2>
-      <h3 id="winner-name"></h3>
-      <p>Congratulations! You are the Meme Master!</p>
-      <div id="losers-list"></div>
-      <button id="restart-all" class="btn">Restart Tournament</button>
-    </div>
-  </div>
+  <canvas id="confetti"></canvas>
 
-  <!-- Background & sound effects -->
-  <audio id="bg-music" src="sounds/bg-music.mp3" loop></audio>
-  <audio id="flip-sound" src="sounds/flip.mp3"></audio>
-  <audio id="match-sound" src="sounds/match.mp3"></audio>
-  <audio id="win-sound" src="sounds/win.mp3"></audio>
+  <audio id="win-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_92f92f6a4e.mp3?filename=success-1-6297.mp3"></audio>
+  <audio id="lose-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_74f3b09c3a.mp3?filename=failure-drum-sound-effect-2-7184.mp3"></audio>
 
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
