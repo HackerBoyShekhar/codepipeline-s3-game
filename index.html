@@ -1,45 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Meme Matching Game</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1 class="game-title">🎮 MEME MATCHING GAME 🎮</h1>
+  <div class="wrap">
 
-    <!-- Name Input -->
-    <div id="name-screen" class="name-screen fade-in">
-      <p>Enter your name to begin your challenge 👇</p>
-      <input type="text" id="player-name" placeholder="Your Name..." />
-      <button id="start-btn">Start Game</button>
-    </div>
-
-    <!-- Game Area -->
-    <div id="game-area" class="hidden fade-in">
-      <div class="game-top">
-        <p id="player-display"></p>
-        <p id="timer">⏱️ Time: 0s</p>
+    <!-- 1) NAME SCREEN -->
+    <section id="name-screen" class="card-panel">
+      <h1 class="title">🎮 MEME MATCHING GAME</h1>
+      <p class="sub">Enter your player name to begin</p>
+      <input id="player-name" type="text" maxlength="16" placeholder="Your name..." />
+      <div class="row">
+        <button id="btn-start" class="btn">Start</button>
       </div>
-      <div id="game-board" class="game-board"></div>
-    </div>
+      <p class="hint">Tournament: 3 players → leaderboard will show automatically</p>
+    </section>
 
-    <!-- Leaderboard -->
-    <div id="leaderboard" class="hidden fade-in">
-      <h2>🏆 Final Leaderboard 🏆</h2>
-      <ul id="leader-list"></ul>
-      <button id="play-again">Play Again</button>
-    </div>
+    <!-- 2) GAME AREA -->
+    <section id="game-screen" class="card-panel hidden">
+      <header class="game-header">
+        <div id="player-display" class="player-display"></div>
+        <div id="timer" class="timer">⏱ 0s</div>
+      </header>
+
+      <div id="game-board" class="game-board"></div>
+
+      <div class="controls">
+        <button id="btn-restart" class="btn secondary">Restart Round</button>
+      </div>
+    </section>
+
+    <!-- 3) LEADERBOARD -->
+    <section id="leaderboard-screen" class="card-panel hidden leaderboard-panel">
+      <h2 class="leader-title">🏆 Final Leaderboard</h2>
+      <ul id="leader-list" class="leader-list"></ul>
+      <div class="leader-actions">
+        <button id="btn-playagain" class="btn">Play Again (New Tournament)</button>
+      </div>
+    </section>
+
   </div>
 
-  <canvas id="confetti"></canvas>
-
-  <audio id="win-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_92f92f6a4e.mp3?filename=success-1-6297.mp3"></audio>
-  <audio id="lose-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_74f3b09c3a.mp3?filename=failure-drum-sound-effect-2-7184.mp3"></audio>
-
+  <!-- confetti lib (optional) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+  <!-- sounds (optional external links; replace with local files if you want) -->
+  <audio id="sound-win" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_92f92f6a4e.mp3?filename=success-1-6297.mp3"></audio>
+  <audio id="sound-lose" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_74f3b09c3a.mp3?filename=failure-drum-sound-effect-2-7184.mp3"></audio>
+
   <script src="script.js"></script>
 </body>
 </html>
