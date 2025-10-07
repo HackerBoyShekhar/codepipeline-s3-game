@@ -14,7 +14,6 @@ const loseSound = document.getElementById("lose-sound");
 let playerName = "";
 let flippedCards = [];
 let matchedPairs = 0;
-let roundCount = 0;
 let startTime, timerInterval;
 let playersData = JSON.parse(localStorage.getItem("playersData")) || [];
 
@@ -81,27 +80,24 @@ function endRound() {
   clearInterval(timerInterval);
   const timeTaken = Math.floor((Date.now() - startTime) / 1000);
   const score = Math.max(100 - timeTaken, 10);
-  
-  const bonus = document.createElement("div");
-  bonus.classList.add("bonus");
-  bonus.textContent = `+${score} Speed Bonus!`;
-  gameArea.appendChild(bonus);
-  setTimeout(() => bonus.remove(), 1500);
 
-  roundCount++;
-  playersData.push({ name: playerName, score });
-  
-  if (roundCount >= 3) showLeaderboard();
-  else setTimeout(startGame, 2000);
+  // Update or add player record
+  const existingPlayer = playersData.find(p => p.name === playerName);
+  if (existingPlayer) {
+    existingPlayer.score = Math.max(existingPlayer.score, score); // keep best score
+  } else {
+    playersData.push({ name: playerName, score });
+  }
+
+  localStorage.setItem("playersData", JSON.stringify(playersData));
+  showLeaderboard();
 }
 
 function showLeaderboard() {
   gameArea.classList.add("hidden");
   leaderboardDiv.classList.remove("hidden");
-  playersData = playersData.slice(-5);
-  localStorage.setItem("playersData", JSON.stringify(playersData));
 
-  const sorted = [...playersData].sort((a,b) => b.score - a.score);
+  const sorted = [...playersData].sort((a, b) => b.score - a.score).slice(0, 5);
   leaderList.innerHTML = "";
 
   sorted.forEach((p, i) => {
@@ -122,7 +118,6 @@ function showLeaderboard() {
 playAgainBtn.addEventListener("click", () => {
   leaderboardDiv.classList.add("hidden");
   nameScreen.classList.remove("hidden");
-  roundCount = 0;
 });
 
 function launchConfetti() {
