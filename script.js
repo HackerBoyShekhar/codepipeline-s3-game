@@ -1,143 +1,264 @@
-const startBtn = document.getElementById("start-btn");
-const playerInput = document.getElementById("player-name");
-const nameScreen = document.getElementById("name-screen");
-const gameArea = document.getElementById("game-area");
-const playerDisplay = document.getElementById("player-display");
-const gameBoard = document.getElementById("game-board");
-const leaderboardDiv = document.getElementById("leaderboard");
-const leaderList = document.getElementById("leader-list");
-const playAgainBtn = document.getElementById("play-again");
-const timerDisplay = document.getElementById("timer");
-const winSound = document.getElementById("win-sound");
-const loseSound = document.getElementById("lose-sound");
+/* 
+  Behavior:
+  - sessionPlayers (in localStorage) holds the tournament players (max 3)
+  - each finished player enters their best score (higher is better)
+  - after 3 unique players finish => show leaderboard automatically
+  - Play Again clears the session and returns to name input
+*/
 
-let playerName = "";
-let flippedCards = [];
-let matchedPairs = 0;
-let startTime, timerInterval;
-let playersData = JSON.parse(localStorage.getItem("playersData")) || [];
+const STORAGE_KEY = 'sessionPlayers';       // stores current tournament players (array)
+const MAX_PLAYERS = 3;                      // EXACTLY 3 players per tournament
 
-const memes = ["😂","🔥","😎","🥶","💀","💩","😜","🤡"];
+/* DOM */
+const nameScreen = document.getElementById('name-screen');
+const gameScreen = document.getElementById('game-screen');
+const leaderboardScreen = document.getElementById('leaderboard-screen');
 
-startBtn.addEventListener("click", () => {
-  playerName = playerInput.value.trim();
-  if (!playerName) return alert("Please enter your name!");
-  nameScreen.classList.add("hidden");
-  gameArea.classList.remove("hidden");
-  playerDisplay.textContent = `🎯 Player: ${playerName}`;
-  startGame();
+const inputName = document.getElementById('player-name');
+const btnStart = document.getElementById('btn-start');
+const btnRestart = document.getElementById('btn-restart');
+const btnPlayAgain = document.getElementById('btn-playagain');
+
+const playerDisplay = document.getElementById('player-display');
+const timerLabel = document.getElementById('timer');
+const gameBoard = document.getElementById('game-board');
+const leaderList = document.getElementById('leader-list');
+
+const soundWin = document.getElementById('sound-win');
+const soundLose = document.getElementById('sound-lose');
+
+let playerName = '';
+let cards = [];
+let flipped = [];
+let matches = 0;
+let startTime = 0;
+let timerInterval = null;
+
+/* emoji set used as cards */
+const MEMES = ['😂','🔥','😎','🥶','💀','💩','😜','🤡'];
+
+/* load session from storage or empty array */
+function loadSession(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+function saveSession(arr){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+/* start tournament flow */
+btnStart.addEventListener('click', () => {
+  const name = inputName.value.trim();
+  if(!name){ alert('Please enter your name'); return; }
+  playerName = name;
+  setupGameForPlayer();
 });
 
-function startGame() {
-  matchedPairs = 0;
-  flippedCards = [];
-  startTime = Date.now();
-  clearInterval(timerInterval);
-  timerInterval = setInterval(updateTimer, 1000);
+/* restart round button (only restarts current round) */
+btnRestart.addEventListener('click', () => {
+  createBoard();
+});
 
-  const cards = [...memes, ...memes].sort(() => Math.random() - 0.5);
-  gameBoard.innerHTML = "";
-  cards.forEach(symbol => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.textContent = "?";
-    card.dataset.symbol = symbol;
-    card.addEventListener("click", flipCard);
-    gameBoard.appendChild(card);
+/* Play Again after leaderboard - resets tournament */
+btnPlayAgain.addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  // reset UI to name input for new tournament
+  inputName.value = '';
+  leaderboardScreen.classList.add('hidden');
+  nameScreen.classList.remove('hidden');
+});
+
+/* prepare game UI for current player */
+function setupGameForPlayer(){
+  // show game, hide name/leaderboard
+  nameScreen.classList.add('hidden');
+  leaderboardScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+
+  playerDisplay.textContent = `Player: ${playerName}`;
+  startTimer();
+  createBoard();
+}
+
+/* create shuffled board and reset status */
+function createBoard(){
+  stopTimer();
+  timerLabel.textContent = '⏱ 0s';
+  startTime = Date.now();
+  startTimer();
+
+  // prepare shuffled card set
+  const pairSet = MEMES.slice(0, 8); // uses 8 pairs; adjust if needed
+  cards = shuffle([...pairSet, ...pairSet]);
+  matches = 0;
+  flipped = [];
+
+  // render
+  gameBoard.innerHTML = '';
+  cards.forEach((sym, idx) => {
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.dataset.index = idx;
+    c.dataset.sym = sym;
+    c.textContent = '?';
+    c.addEventListener('click', onCardClick);
+    gameBoard.appendChild(c);
   });
 }
 
-function updateTimer() {
-  const seconds = Math.floor((Date.now() - startTime) / 1000);
-  timerDisplay.textContent = `⏱️ Time: ${seconds}s`;
-}
+/* shuffle helper */
+function shuffle(a){ return a.sort(()=> Math.random()-0.5); }
 
-function flipCard() {
-  if (flippedCards.length === 2 || this.classList.contains("flipped")) return;
-  this.classList.add("flipped");
-  this.textContent = this.dataset.symbol;
-  flippedCards.push(this);
-  if (flippedCards.length === 2) setTimeout(checkMatch, 800);
-}
+/* card click handler */
+function onCardClick(e){
+  const el = e.currentTarget;
+  if(el.classList.contains('flipped')) return;
+  if(flipped.length === 2) return;
 
-function checkMatch() {
-  const [c1, c2] = flippedCards;
-  if (c1.dataset.symbol === c2.dataset.symbol) {
-    matchedPairs++;
-    c1.style.pointerEvents = "none";
-    c2.style.pointerEvents = "none";
-    if (matchedPairs === memes.length) endRound();
-  } else {
-    c1.classList.remove("flipped");
-    c2.classList.remove("flipped");
-    c1.textContent = "?";
-    c2.textContent = "?";
+  el.classList.add('flipped');
+  el.textContent = el.dataset.sym;
+  flipped.push(el);
+
+  if(flipped.length === 2){
+    setTimeout(checkPair, 700);
   }
-  flippedCards = [];
 }
 
-function endRound() {
-  clearInterval(timerInterval);
-  const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-  const score = Math.max(100 - timeTaken, 10);
-
-  // Update or add player record
-  const existingPlayer = playersData.find(p => p.name === playerName);
-  if (existingPlayer) {
-    existingPlayer.score = Math.max(existingPlayer.score, score); // keep best score
+/* check pair */
+function checkPair(){
+  if(flipped.length < 2) return;
+  const [a,b] = flipped;
+  if(a.dataset.sym === b.dataset.sym && a !== b){
+    a.style.pointerEvents = 'none';
+    b.style.pointerEvents = 'none';
+    matches++;
   } else {
-    playersData.push({ name: playerName, score });
+    a.classList.remove('flipped'); a.textContent = '?';
+    b.classList.remove('flipped'); b.textContent = '?';
   }
+  flipped = [];
 
-  localStorage.setItem("playersData", JSON.stringify(playersData));
-  showLeaderboard();
+  if(matches === MEMES.length){ roundComplete(); }
 }
 
-function showLeaderboard() {
-  gameArea.classList.add("hidden");
-  leaderboardDiv.classList.remove("hidden");
+/* timer helpers */
+function startTimer(){
+  stopTimer();
+  startTime = Date.now();
+  timerInterval = setInterval(() => {
+    const sec = Math.floor((Date.now() - startTime)/1000);
+    timerLabel.textContent = `⏱ ${sec}s`;
+  }, 300);
+}
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+}
 
-  const sorted = [...playersData].sort((a, b) => b.score - a.score).slice(0, 5);
-  leaderList.innerHTML = "";
+/* round complete - compute score and save to session */
+function roundComplete(){
+  stopTimer();
+  const timeSec = Math.floor((Date.now() - startTime)/1000);
+  // score formula: faster => higher. keep floor 10
+  const score = Math.max(100 - timeSec, 10);
 
-  sorted.forEach((p, i) => {
-    const li = document.createElement("li");
-    if (i === 0) {
-      li.classList.add("winner");
+  // get existing session
+  const session = loadSession();
+  // check existing player entry -> keep best score
+  const existing = session.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+  if(existing){
+    if(score > existing.score) existing.score = score;
+  } else {
+    if(session.length < MAX_PLAYERS) session.push({ name: playerName, score });
+    else {
+      // if session already has 3 players, replace lowest if this is higher
+      const minIdx = session.reduce((mi, cur, i, arr) => cur.score < arr[mi].score ? i : mi, 0);
+      if(score > session[minIdx].score){
+        session[minIdx] = { name: playerName, score };
+      }
+    }
+  }
+  saveSession(session);
+
+  // if session reached exactly MAX_PLAYERS -> show leaderboard
+  const after = loadSession();
+  if(after.length >= MAX_PLAYERS){
+    showLeaderboard();
+  } else {
+    // otherwise prompt next player: return to name screen
+    setTimeout(()=> {
+      alert(`Round finished! ${playerName} scored ${score}. Next player, please enter your name.`);
+      // go to name input for next player
+      inputName.value = '';
+      gameScreen.classList.add('hidden');
+      nameScreen.classList.remove('hidden');
+    }, 300);
+  }
+}
+
+/* show the leaderboard built from session (max 3) */
+function showLeaderboard(){
+  gameScreen.classList.add('hidden');
+  leaderboardScreen.classList.remove('hidden');
+
+  const session = loadSession().slice(); // copy
+  // sort desc by score
+  session.sort((a,b)=> b.score - a.score);
+
+  // build UI (exactly up to 3 entries)
+  leaderList.innerHTML = '';
+  session.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.textContent = `${p.name} — Score: ${p.score}`;
+    // style rows similar to sample image: first gold, remaining darker shades
+    if(i===0){
+      li.classList.add('winner');
       li.innerHTML = `🏆 ${p.name} — WINNER 🎉 (Score: ${p.score})`;
-      winSound.play();
+      // celebratory effects
+      if(soundAvailable(soundWin)) soundWin.play().catch(()=>{});
       launchConfetti();
-    } else {
+    } else if(i===1){
+      li.classList.add('loser-1');
       li.innerHTML = `💀 ${p.name} — Loser 😞 (Score: ${p.score})`;
-      loseSound.play();
+      if(soundAvailable(soundLose)) soundLose.play().catch(()=>{});
+    } else {
+      li.classList.add('loser-2');
+      li.innerHTML = `💀 ${p.name} — Loser 😞 (Score: ${p.score})`;
+      if(soundAvailable(soundLose)) soundLose.play().catch(()=>{});
     }
     leaderList.appendChild(li);
   });
 }
 
-playAgainBtn.addEventListener("click", () => {
-  leaderboardDiv.classList.add("hidden");
-  nameScreen.classList.remove("hidden");
-});
-
-function launchConfetti() {
-  const duration = 3 * 1000;
-  const end = Date.now() + duration;
-
-  (function frame() {
-    confetti({
-      particleCount: 4,
-      angle: 60,
-      spread: 55,
-      origin: { x: 0 },
-    });
-    confetti({
-      particleCount: 4,
-      angle: 120,
-      spread: 55,
-      origin: { x: 1 },
-    });
-    if (Date.now() < end) requestAnimationFrame(frame);
-  })();
+/* simple confetti */
+function launchConfetti(){
+  if(typeof confetti === 'function'){
+    const duration = 2.5 * 1000;
+    const end = Date.now() + duration;
+    (function frame(){
+      confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 } });
+      if(Date.now() < end) requestAnimationFrame(frame);
+    })();
+  }
 }
+
+/* sound check helper */
+function soundAvailable(el){ return !!(el && el.play); }
+
+/* --- on load, restore session state if any --- */
+(function init(){
+  const session = loadSession();
+  // if session already reached MAX_PLAYERS, show leaderboard directly
+  if(session && session.length >= MAX_PLAYERS){
+    nameScreen.classList.add('hidden');
+    showLeaderboard();
+    return;
+  }
+  // otherwise show name input
+  nameScreen.classList.remove('hidden');
+  gameScreen.classList.add('hidden');
+  leaderboardScreen.classList.add('hidden');
+})();
 
