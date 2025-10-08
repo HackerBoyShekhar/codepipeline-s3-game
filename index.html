@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Meme Matching Game</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="wrap">
 
-    <!-- 1) NAME SCREEN -->
+    <!-- NAME SCREEN -->
     <section id="name-screen" class="card-panel">
       <h1 class="title">🎮 MEME MATCHING GAME</h1>
       <p class="sub">Enter your player name to begin</p>
@@ -20,7 +20,7 @@
       <p class="hint">Tournament: 3 players → leaderboard will show automatically</p>
     </section>
 
-    <!-- 2) GAME AREA -->
+    <!-- GAME AREA -->
     <section id="game-screen" class="card-panel hidden">
       <header class="game-header">
         <div id="player-display" class="player-display"></div>
@@ -34,7 +34,7 @@
       </div>
     </section>
 
-    <!-- 3) LEADERBOARD -->
+    <!-- LEADERBOARD -->
     <section id="leaderboard-screen" class="card-panel hidden leaderboard-panel">
       <h2 class="leader-title">🏆 Final Leaderboard</h2>
       <ul id="leader-list" class="leader-list"></ul>
@@ -45,10 +45,8 @@
 
   </div>
 
-  <!-- confetti lib (optional) -->
+  <!-- confetti and sounds -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-
-  <!-- sounds (optional external links; replace with local files if you want) -->
   <audio id="sound-win" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_92f92f6a4e.mp3?filename=success-1-6297.mp3"></audio>
   <audio id="sound-lose" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_74f3b09c3a.mp3?filename=failure-drum-sound-effect-2-7184.mp3"></audio>
 
