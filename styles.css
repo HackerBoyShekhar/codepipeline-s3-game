@@ -1,71 +1,89 @@
-body {
-  font-family: 'Poppins', sans-serif;
-  background: radial-gradient(circle at top, #1a1a2e, #0f0f1c);
-  color: white;
+* {
   margin: 0;
   padding: 0;
-  text-align: center;
-  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
-.screen {
-  display: none;
-  transition: opacity 0.6s ease-in-out;
-}
-
-.screen.active {
-  display: block;
-  opacity: 1;
+body {
+  background: radial-gradient(circle at top, #1e1e2f, #111);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
-.title {
-  font-size: 3rem;
-  margin-top: 80px;
-  animation: glow 2s infinite alternate;
+/* Intro Screen */
+.intro-screen {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(255, 123, 0, 0.4);
 }
 
-@keyframes glow {
-  from { text-shadow: 0 0 10px #0ff; }
-  to { text-shadow: 0 0 20px #00f2ff; }
-}
-
-.intro-text {
-  font-size: 1.2rem;
-  color: #bbb;
+.intro-screen h1 {
+  font-size: 2.5em;
+  background: linear-gradient(90deg, #ff0077, #ff7b00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 20px;
 }
 
 #player-name {
+  width: 250px;
   padding: 10px;
-  font-size: 1.1rem;
   border-radius: 8px;
   border: none;
-  width: 250px;
-  margin: 15px 0;
+  outline: none;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.1em;
 }
 
 .btn {
-  background-color: #00adb5;
-  color: white;
+  background: linear-gradient(135deg, #ff0077, #ff7b00);
   border: none;
-  padding: 12px 25px;
-  font-size: 1.1rem;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1.1em;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: 0.3s;
 }
 
 .btn:hover {
-  background-color: #02d3e1;
   transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 123, 0, 0.6);
 }
 
-.small {
-  padding: 8px 16px;
-  font-size: 0.9rem;
+/* Game Area */
+.game-container {
+  text-align: center;
+  width: 90%;
+  max-width: 900px;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.8em;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.stats span {
+  font-size: 1.1em;
+  margin: 0 10px;
 }
 
 .game-board {
@@ -73,73 +91,97 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: 15px;
   justify-content: center;
-  padding: 30px;
-  max-width: 900px;
-  margin: 0 auto;
+  margin-top: 20px;
 }
 
 .card {
-  width: 150px;
+  width: 120px;
   height: 120px;
   perspective: 1000px;
   cursor: pointer;
-  position: relative;
 }
 
 .card-inner {
-  position: absolute;
   width: 100%;
   height: 100%;
-  transition: transform 0.6s;
+  position: relative;
   transform-style: preserve-3d;
+  transition: transform 0.6s;
 }
 
-.card.flipped .card-inner {
+.card.flip .card-inner {
   transform: rotateY(180deg);
 }
 
-.card-front, .card-back {
+.card-front,
+.card-back {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 12px;
   backface-visibility: hidden;
-  overflow: hidden;
 }
 
 .card-front {
-  background: #393e46;
+  background: #2a2a3b;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 2em;
+  color: #ff7b00;
+  border: 2px solid #444;
 }
 
 .card-back {
   transform: rotateY(180deg);
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #ff7b00;
 }
 
-.card img {
+/* Modal + Winner */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99;
 }
 
-#leaderboard-list {
-  margin-top: 30px;
+.modal-content {
+  background: #222;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(255, 123, 0, 0.6);
+  position: relative;
 }
 
-.leaderboard-item {
-  background: rgba(255, 255, 255, 0.1);
-  margin: 10px auto;
-  width: 50%;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  transition: transform 0.3s;
+.winner h3 {
+  background: linear-gradient(90deg, #ff0077, #ff7b00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2em;
+  margin: 10px 0;
 }
 
-.leaderboard-item:hover {
-  transform: scale(1.05);
-  background: rgba(0, 255, 255, 0.2);
+#losers-list {
+  margin-top: 20px;
+  color: #ccc;
+}
+
+/* Confetti Animation */
+#confetti {
+  position: absolute;
+  top: -50px;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none;
 }
 
