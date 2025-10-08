@@ -1,36 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meme Matching Game</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="intro-screen" class="screen active">
-    <h1 class="title">🎮 Meme Matching Game</h1>
-    <p class="intro-text">Enter your name to begin your meme challenge!</p>
-    <input type="text" id="player-name" placeholder="Enter your name" />
+  <!-- Intro Screen -->
+  <div class="intro-screen" id="intro-screen">
+    <h1>🎭 Meme Memory Challenge 🎭</h1>
+    <p>Enter your name to begin the fun!</p>
+    <input type="text" id="player-name" placeholder="Your Name" maxlength="15">
     <button id="start-btn" class="btn">Start Game</button>
   </div>
 
-  <div id="game-screen" class="screen hidden">
-    <div class="top-bar">
-      <h2 id="player-display"></h2>
-      <button id="restart-btn" class="btn small">Restart Round</button>
+  <!-- Game Container -->
+  <div class="game-container hidden" id="game-container">
+    <h2>Welcome, <span id="display-name"></span> 👋</h2>
+    <div class="controls">
+      <button id="start-game" class="btn">Restart</button>
+      <div class="stats">
+        <span>⏱ Time: <span id="timer">0</span>s</span>
+        <span>🏆 Score: <span id="score">0</span></span>
+      </div>
     </div>
     <div id="game-board" class="game-board"></div>
   </div>
 
-  <div id="leaderboard-screen" class="screen hidden">
-    <h2>🏆 Leaderboard 🏆</h2>
-    <div id="leaderboard-list"></div>
-    <button id="play-again" class="btn">Play Again</button>
+  <!-- Modal After Each Game -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content" id="modal-content">
+      <h2>🎉 Game Complete 🎉</h2>
+      <p>Nice work <span id="final-player"></span>!</p>
+      <p>Your Time: <span id="final-time"></span>s</p>
+      <button id="play-again" class="btn">Play Again</button>
+    </div>
   </div>
 
-  <!-- Background Music and Sounds -->
-  <audio id="bg-music" src="sounds/bg.mp3" loop></audio>
+  <!-- Winner Screen -->
+  <div id="winner-screen" class="modal hidden">
+    <div class="modal-content winner">
+      <h2>🏆 Ultimate Winner 🏆</h2>
+      <h3 id="winner-name"></h3>
+      <div id="confetti"></div>
+      <p>Congratulations! You are the Meme Master!</p>
+      <div id="losers-list"></div>
+      <button id="restart-all" class="btn">Restart Tournament</button>
+    </div>
+  </div>
+
+  <!-- Sounds -->
+  <audio id="bg-music" src="sounds/bg-music.mp3" loop></audio>
   <audio id="flip-sound" src="sounds/flip.mp3"></audio>
+  <audio id="match-sound" src="sounds/match.mp3"></audio>
   <audio id="win-sound" src="sounds/win.mp3"></audio>
 
   <script src="script.js"></script>
