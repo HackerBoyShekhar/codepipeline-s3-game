@@ -1,164 +1,192 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const intro = document.getElementById('intro-screen');
-  const gameContainer = document.getElementById('game-container');
-  const gameBoard = document.getElementById('game-board');
-  const startBtn = document.getElementById('start-btn');
-  const startGameBtn = document.getElementById('start-game');
-  const modal = document.getElementById('modal');
-  const playAgainBtn = document.getElementById('play-again');
-  const winnerScreen = document.getElementById('winner-screen');
-  const restartAllBtn = document.getElementById('restart-all');
-  const bgMusic = document.getElementById('bg-music');
-  const flipSound = document.getElementById('flip-sound');
-  const matchSound = document.getElementById('match-sound');
-  const winSound = document.getElementById('win-sound');
+const STORAGE_KEY = 'sessionPlayers';
+const MAX_PLAYERS = 3;
 
-  const playerNameInput = document.getElementById('player-name');
-  const displayName = document.getElementById('display-name');
-  const finalPlayer = document.getElementById('final-player');
-  const timerDisplay = document.getElementById('timer');
-  const scoreDisplay = document.getElementById('score');
-  const finalTime = document.getElementById('final-time');
-  const winnerName = document.getElementById('winner-name');
-  const losersList = document.getElementById('losers-list');
+/* DOM elements */
+const nameScreen = document.getElementById('name-screen');
+const gameScreen = document.getElementById('game-screen');
+const leaderboardScreen = document.getElementById('leaderboard-screen');
+const inputName = document.getElementById('player-name');
+const btnStart = document.getElementById('btn-start');
+const btnRestart = document.getElementById('btn-restart');
+const btnPlayAgain = document.getElementById('btn-playagain');
+const playerDisplay = document.getElementById('player-display');
+const timerLabel = document.getElementById('timer');
+const gameBoard = document.getElementById('game-board');
+const leaderList = document.getElementById('leader-list');
+const soundWin = document.getElementById('sound-win');
+const soundLose = document.getElementById('sound-lose');
 
-  let playerName = '';
-  let timer, time = 0, score = 0;
-  let cardsChosen = [], cardsChosenId = [], cardsWon = [];
-  let playersData = [];
-  const maxPlayers = 3;
+let playerName = '', cards = [], flipped = [], matches = 0, startTime = 0, timerInterval = null;
+const MEMES = ['😂','🔥','😎','🥶','💀','💩','😜','🤡'];
 
-  const cardArray = [
-    { name: 'distracted', img: 'https://i.imgur.com/ZVbqP2C.png' },
-    { name: 'drake', img: 'https://i.imgur.com/fXK0Mka.png' },
-    { name: 'fine', img: 'https://i.imgur.com/DPxYhQf.png' },
-    { name: 'rollsafe', img: 'https://i.imgur.com/ieJML6v.png' },
-    { name: 'success', img: 'https://i.imgur.com/2y8A1pq.png' },
-  ];
-  const gameCards = [...cardArray, ...cardArray];
+/* storage */
+function loadSession() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveSession(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
 
-  startBtn.addEventListener('click', () => {
-    playerName = playerNameInput.value.trim();
-    if (!playerName) return alert('Please enter your name!');
-    intro.classList.add('hidden');
-    gameContainer.classList.remove('hidden');
-    displayName.textContent = playerName;
-    bgMusic.play();
-    startGame();
-  });
-
-  function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-  }
-
-  function startGame() {
-    shuffle(gameCards);
-    gameBoard.innerHTML = '';
-    cardsChosen = [];
-    cardsChosenId = [];
-    cardsWon = [];
-    score = 0;
-    time = 0;
-    scoreDisplay.textContent = score;
-    timerDisplay.textContent = time;
-
-    clearInterval(timer);
-    timer = setInterval(() => {
-      time++;
-      timerDisplay.textContent = time;
-    }, 1000);
-
-    gameCards.forEach((item, i) => {
-      const card = document.createElement('div');
-      card.classList.add('card');
-      card.innerHTML = `
-        <div class="card-inner">
-          <div class="card-front">🎭</div>
-          <div class="card-back" style="background-image: url(${item.img})"></div>
-        </div>`;
-      card.dataset.id = i;
-      card.addEventListener('click', flipCard);
-      gameBoard.appendChild(card);
-    });
-  }
-
-  function flipCard() {
-    const card = this;
-    const id = card.dataset.id;
-    if (cardsChosenId.includes(id) || card.classList.contains('flip')) return;
-    flipSound.play();
-    card.classList.add('flip');
-    cardsChosen.push(gameCards[id].name);
-    cardsChosenId.push(id);
-    if (cardsChosen.length === 2) setTimeout(checkForMatch, 600);
-  }
-
-  function checkForMatch() {
-    const cards = document.querySelectorAll('.card');
-    const [firstId, secondId] = cardsChosenId;
-    const [firstName, secondName] = cardsChosen;
-
-    if (firstName === secondName && firstId !== secondId) {
-      matchSound.play();
-      score += 10;
-      scoreDisplay.textContent = score;
-      cards[firstId].style.visibility = 'hidden';
-      cards[secondId].style.visibility = 'hidden';
-      cardsWon.push(cardsChosen);
-    } else {
-      cards[firstId].classList.remove('flip');
-      cards[secondId].classList.remove('flip');
-    }
-
-    cardsChosen = [];
-    cardsChosenId = [];
-
-    if (cardsWon.length === gameCards.length / 2) {
-      endGame();
-    }
-  }
-
-  function endGame() {
-    clearInterval(timer);
-    winSound.play();
-    finalPlayer.textContent = playerName;
-    finalTime.textContent = time;
-    playersData.push({ name: playerName, score, time });
-    modal.classList.remove('hidden');
-
-    if (playersData.length === maxPlayers) {
-      setTimeout(showFinalWinner, 800);
-    }
-  }
-
-  playAgainBtn.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    startGame();
-  });
-
-  function showFinalWinner() {
-    modal.classList.add('hidden');
-    gameContainer.classList.add('hidden');
-    bgMusic.pause();
-
-    playersData.sort((a, b) => b.score - a.score || a.time - b.time);
-    const winner = playersData[0];
-    winnerName.textContent = `🏅 ${winner.name.toUpperCase()} 🏅`;
-
-    losersList.innerHTML = playersData
-      .slice(1)
-      .map(p => `<p>😅 ${p.name} — Loser</p>`)
-      .join('');
-
-    winnerScreen.classList.remove('hidden');
-  }
-
-  restartAllBtn.addEventListener('click', () => {
-    playersData = [];
-    winnerScreen.classList.add('hidden');
-    intro.classList.remove('hidden');
-  });
-
-  startGameBtn.addEventListener('click', startGame);
+/* buttons */
+btnStart.addEventListener('click', () => {
+  const name = inputName.value.trim();
+  if (!name) return alert('Please enter your name');
+  playerName = name;
+  setupGameForPlayer();
 });
+
+btnRestart.addEventListener('click', createBoard);
+
+btnPlayAgain.addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  inputName.value = '';
+  leaderboardScreen.classList.add('hidden');
+  nameScreen.classList.remove('hidden');
+});
+
+/* setup */
+function setupGameForPlayer() {
+  nameScreen.classList.add('hidden');
+  leaderboardScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+  playerDisplay.textContent = `Player: ${playerName}`;
+  startTimer();
+  createBoard();
+}
+
+/* board */
+function createBoard() {
+  stopTimer();
+  timerLabel.textContent = '⏱ 0s';
+  startTime = Date.now();
+  startTimer();
+  const pairSet = MEMES.slice(0, 8);
+  cards = shuffle([...pairSet, ...pairSet]);
+  matches = 0;
+  flipped = [];
+  gameBoard.innerHTML = '';
+  cards.forEach((sym, idx) => {
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.dataset.index = idx;
+    c.dataset.sym = sym;
+    c.textContent = '?';
+    c.addEventListener('click', onCardClick);
+    gameBoard.appendChild(c);
+  });
+}
+function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+
+/* card click */
+function onCardClick(e) {
+  const el = e.currentTarget;
+  if (el.classList.contains('flipped') || flipped.length === 2) return;
+  el.classList.add('flipped');
+  el.textContent = el.dataset.sym;
+  flipped.push(el);
+  if (flipped.length === 2) setTimeout(checkPair, 700);
+}
+
+/* check pair */
+function checkPair() {
+  if (flipped.length < 2) return;
+  const [a, b] = flipped;
+  if (a.dataset.sym === b.dataset.sym && a !== b) {
+    a.style.pointerEvents = b.style.pointerEvents = 'none';
+    matches++;
+  } else {
+    a.classList.remove('flipped'); a.textContent = '?';
+    b.classList.remove('flipped'); b.textContent = '?';
+  }
+  flipped = [];
+  if (matches === MEMES.length) roundComplete();
+}
+
+/* timer */
+function startTimer() {
+  stopTimer();
+  startTime = Date.now();
+  timerInterval = setInterval(() => {
+    const sec = Math.floor((Date.now() - startTime) / 1000);
+    timerLabel.textContent = `⏱ ${sec}s`;
+  }, 300);
+}
+function stopTimer() { if (timerInterval) clearInterval(timerInterval); }
+
+/* finish */
+function roundComplete() {
+  stopTimer();
+  const timeSec = Math.floor((Date.now() - startTime) / 1000);
+  const score = Math.max(100 - timeSec, 10);
+  const session = loadSession();
+  const existing = session.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+  if (existing) {
+    if (score > existing.score) existing.score = score;
+  } else {
+    if (session.length < MAX_PLAYERS) session.push({ name: playerName, score });
+    else {
+      const minIdx = session.reduce((mi, cur, i, arr) => cur.score < arr[mi].score ? i : mi, 0);
+      if (score > session[minIdx].score) session[minIdx] = { name: playerName, score };
+    }
+  }
+  saveSession(session);
+  const after = loadSession();
+  if (after.length >= MAX_PLAYERS) showLeaderboard();
+  else {
+    setTimeout(() => {
+      alert(`Round finished! ${playerName} scored ${score}. Next player, please enter your name.`);
+      inputName.value = '';
+      gameScreen.classList.add('hidden');
+      nameScreen.classList.remove('hidden');
+    }, 300);
+  }
+}
+
+/* leaderboard */
+function showLeaderboard() {
+  gameScreen.classList.add('hidden');
+  leaderboardScreen.classList.remove('hidden');
+  const session = loadSession().slice().sort((a, b) => b.score - a.score);
+  leaderList.innerHTML = '';
+  session.forEach((p, i) => {
+    const li = document.createElement('li');
+    if (i === 0) {
+      li.classList.add('winner');
+      li.innerHTML = `🏆 ${p.name} — WINNER 🎉 (Score: ${p.score})`;
+      playSound(soundWin);
+      launchConfetti();
+    } else {
+      li.classList.add(i === 1 ? 'loser-1' : 'loser-2');
+      li.innerHTML = `💀 ${p.name} — Loser 😞 (Score: ${p.score})`;
+      playSound(soundLose);
+    }
+    leaderList.appendChild(li);
+  });
+}
+
+/* confetti */
+function launchConfetti() {
+  if (typeof confetti === 'function') {
+    const duration = 2500;
+    const end = Date.now() + duration;
+    (function frame() {
+      confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  }
+}
+function playSound(el) { if (el && el.play) el.play().catch(() => {}); }
+
+/* init */
+(function init() {
+  const session = loadSession();
+  if (session.length >= MAX_PLAYERS) {
+    nameScreen.classList.add('hidden');
+    showLeaderboard();
+  } else {
+    nameScreen.classList.remove('hidden');
+    gameScreen.classList.add('hidden');
+    leaderboardScreen.classList.add('hidden');
+  }
+})();
 
